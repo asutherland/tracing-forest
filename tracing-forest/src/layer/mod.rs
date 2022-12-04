@@ -159,6 +159,7 @@ where
     S: Subscriber + for<'a> LookupSpan<'a>,
 {
     fn on_new_span(&self, attrs: &Attributes, id: &Id, ctx: Context<S>) {
+        println!("+++ on_new_span {:?}: {:?}", id, ctx.metadata(id).map(|m| m.name()));
         let span = ctx.span(id).expect(fail::SPAN_NOT_IN_CONTEXT);
         let opened = OpenedSpan::new(attrs, &ctx);
 
@@ -233,6 +234,7 @@ where
     }
 
     fn on_enter(&self, id: &Id, ctx: Context<S>) {
+        println!(">>> on_enter {:?}: {:?}", id, ctx.metadata(id).map(|m| m.name()));
         ctx.span(id)
             .expect(fail::SPAN_NOT_IN_CONTEXT)
             .extensions_mut()
@@ -242,6 +244,7 @@ where
     }
 
     fn on_exit(&self, id: &Id, ctx: Context<S>) {
+        println!("<<< on_exit {:?}", id);
         ctx.span(id)
             .expect(fail::SPAN_NOT_IN_CONTEXT)
             .extensions_mut()
@@ -251,6 +254,7 @@ where
     }
 
     fn on_close(&self, id: Id, ctx: Context<S>) {
+        println!("--- on_close {:?}", id);
         let span_ref = ctx.span(&id).expect(fail::SPAN_NOT_IN_CONTEXT);
 
         let mut span = span_ref
